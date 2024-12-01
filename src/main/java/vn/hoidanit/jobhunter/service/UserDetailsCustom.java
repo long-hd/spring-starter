@@ -11,6 +11,9 @@ import org.springframework.stereotype.Component;
 
 import vn.hoidanit.jobhunter.domain.User;
 
+/*
+ Override loadUserByUsername; được gọi bởi authenticate
+*/
 @Component("userDetailsService")
 public class UserDetailsCustom implements UserDetailsService {
     private final UserService userService;
