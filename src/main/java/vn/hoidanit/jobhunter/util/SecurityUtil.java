@@ -18,10 +18,10 @@ import org.springframework.stereotype.Service;
 import com.nimbusds.jose.util.Base64;
 
 @Service
-public class SercurityUtil {
+public class SecurityUtil {
     private final JwtEncoder jwtEncoder;
 
-    public SercurityUtil(JwtEncoder jwtEncoder) {
+    public SecurityUtil(JwtEncoder jwtEncoder) {
         this.jwtEncoder = jwtEncoder;
     }
 
