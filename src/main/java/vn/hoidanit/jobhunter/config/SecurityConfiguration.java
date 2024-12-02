@@ -50,11 +50,12 @@ public class SecurityConfiguration {
                 .oauth2ResourceServer(// cần override @Bean JwtDecoder
                         (oauth2) -> oauth2.jwt(Customizer.withDefaults())
                                 .authenticationEntryPoint(customAuthenticationEntryPoint))
-                .exceptionHandling(// cấu hình cho phép xử lý exception trong Global not in Filter
-                        exceptions -> exceptions
-                                .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint()) // 401
-                                .accessDeniedHandler(new BearerTokenAccessDeniedHandler()) // 403
-                )
+                // .exceptionHandling(// cấu hình cho phép xử lý exception trong Global not in
+                // Filter
+                // exceptions -> exceptions
+                // .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint()) // 401
+                // .accessDeniedHandler(new BearerTokenAccessDeniedHandler()) // 403
+                // )
                 .formLogin(f -> f.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
