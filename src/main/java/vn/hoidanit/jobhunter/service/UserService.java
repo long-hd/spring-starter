@@ -9,8 +9,12 @@ import org.springframework.stereotype.Service;
 
 import vn.hoidanit.jobhunter.domain.User;
 import vn.hoidanit.jobhunter.domain.dto.Meta;
+import vn.hoidanit.jobhunter.domain.dto.RespCreateUserDTO;
+import vn.hoidanit.jobhunter.domain.dto.RespUpdateUserDTO;
+import vn.hoidanit.jobhunter.domain.dto.RespUserDTO;
 import vn.hoidanit.jobhunter.domain.dto.ResultPaginationDTO;
 import vn.hoidanit.jobhunter.repository.UserRepository;
+import vn.hoidanit.jobhunter.util.error.IdInvalidException;
 
 @Service
 public class UserService {
@@ -20,17 +24,33 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User handleCreateUser(User user) {
-        return this.userRepository.save(user);
+    public RespCreateUserDTO handleCreateUser(User user) throws IdInvalidException {
+        // ==> check email exist
+        if (this.userRepository.existsByEmail(user.getEmail())) {
+            throw new IdInvalidException("Email " + user.getEmail() + " da ton tai, vui long su dung email khac");
+        }
+
+        user = this.userRepository.save(user);
+
+        RespCreateUserDTO dto = new RespCreateUserDTO();
+        dto.setId(user.getId());
+        dto.setName(user.getName());
+        dto.setEmail(user.getEmail());
+        dto.setAddress(user.getAddress());
+        dto.setAge(user.getAge());
+        dto.setGender(user.getGender());
+        dto.setCreatedAt(user.getCreatedAt());
+
+        return dto;
     }
 
     public void handleDeleteUser(long id) {
         this.userRepository.deleteById(id);
     }
 
-    public User handleGetUser(long id) {
-        User user = this.userRepository.findById(id).orElse(null);
-        return user;
+    public RespUserDTO handleGetUser(long id) {
+        RespUserDTO dto = toRespUserDTO(this.userRepository.findById(id).orElse(null));
+        return dto;
     }
 
     public ResultPaginationDTO handleGetAllUser(Specification<User> spec, Pageable pageable) {
@@ -44,26 +64,42 @@ public class UserService {
         meta.setTotal(pageUsers.getTotalElements());
 
         dto.setMeta(meta);
-        dto.setResult(pageUsers.getContent());
+        dto.setResult(pageUsers.getContent().stream().map((user) -> toRespUserDTO(user)).toList());
 
         return dto;
     }
 
-    public User handleUpdateUser(User updateUser) {
-        User user = this.userRepository.findById(updateUser.getId()).orElse(null);
+    public RespUpdateUserDTO handleUpdateUser(User updateUser) throws IdInvalidException {
+        User user = this.userRepository.findById(updateUser.getId())
+                .orElseThrow(() -> new IdInvalidException("User voi id = " + updateUser.getId() + " khong ton tai."));
 
-        if (user != null) {
-            user.setName(updateUser.getName());
-            user.setEmail(updateUser.getEmail());
-            user.setPassword(updateUser.getPassword());
-            // update
-            user = this.userRepository.save(user);
-        }
+        RespUpdateUserDTO dto = new RespUpdateUserDTO();
+        // update
+        user = this.userRepository.save(updateUser);
+        dto.setName(user.getName());
+        dto.setId(user.getId());
+        dto.setAddress(user.getAddress());
+        dto.setAge(user.getAge());
+        dto.setGender(user.getGender());
+        dto.setUpdatedAt(user.getUpdatedAt());
 
-        return user;
+        return dto;
     }
 
     public User handleGetUserByUsername(String username) {
         return this.userRepository.findByEmail(username);
+    }
+
+    private RespUserDTO toRespUserDTO(User user) {
+        RespUserDTO dto = new RespUserDTO();
+        dto.setId(user.getId());
+        dto.setName(user.getName());
+        dto.setAddress(user.getAddress());
+        dto.setAge(user.getAge());
+        dto.setEmail(user.getEmail());
+        dto.setGender(user.getGender());
+        dto.setCreatedAt(user.getCreatedAt());
+        dto.setUpdatedAt(user.getCreatedAt());
+        return dto;
     }
 }

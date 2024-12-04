@@ -4,7 +4,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.turkraft.springfilter.boot.Filter;
 
+import jakarta.validation.Valid;
 import vn.hoidanit.jobhunter.domain.User;
+import vn.hoidanit.jobhunter.domain.dto.RespCreateUserDTO;
+import vn.hoidanit.jobhunter.domain.dto.RespUpdateUserDTO;
+import vn.hoidanit.jobhunter.domain.dto.RespUserDTO;
 import vn.hoidanit.jobhunter.domain.dto.ResultPaginationDTO;
 import vn.hoidanit.jobhunter.service.UserService;
 import vn.hoidanit.jobhunter.util.annotation.ApiMessage;
@@ -39,12 +43,12 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}")
-    public ResponseEntity<User> getUser(@PathVariable("id") long id) throws IdInvalidException {
+    public ResponseEntity<RespUserDTO> getUser(@PathVariable("id") long id) throws IdInvalidException {
         if (id > 1500) {
             throw new IdInvalidException("Id lớn hơn 1500");
         }
-        User user = this.userService.handleGetUser(id);
-        return ResponseEntity.status(HttpStatus.OK).body(user);
+        RespUserDTO dto = this.userService.handleGetUser(id);
+        return ResponseEntity.status(HttpStatus.OK).body(dto);
     }
 
     @GetMapping("/users")
@@ -57,11 +61,12 @@ public class UserController {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<User> createNewUser(@RequestBody User newManUser) {
-        String hashPassword = passwordEncoder.encode(newManUser.getPassword());
-        newManUser.setPassword(hashPassword);
-        User user = this.userService.handleCreateUser(newManUser);
-        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+    @ApiMessage(Value = "create new user")
+    public ResponseEntity<RespCreateUserDTO> createNewUser(@Valid @RequestBody User newUser) throws IdInvalidException {
+        String hashPassword = passwordEncoder.encode(newUser.getPassword());
+        newUser.setPassword(hashPassword);
+        RespCreateUserDTO dto = this.userService.handleCreateUser(newUser);
+        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
     @DeleteMapping("/users/{id}")
@@ -71,8 +76,8 @@ public class UserController {
     }
 
     @PutMapping("/users")
-    public ResponseEntity<User> updateUser(@RequestBody User updateUser) {
-        User user = this.userService.handleUpdateUser(updateUser);
-        return ResponseEntity.ok(user);
+    public ResponseEntity<RespUpdateUserDTO> updateUser(@RequestBody User updateUser) throws IdInvalidException {
+        RespUpdateUserDTO dto = this.userService.handleUpdateUser(updateUser);
+        return ResponseEntity.ok(dto);
     }
 }
