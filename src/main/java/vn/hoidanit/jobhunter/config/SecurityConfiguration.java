@@ -46,7 +46,8 @@ public class SecurityConfiguration {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(
                         (authorize) -> authorize
-                                .requestMatchers("/", "/api/v1/auth/login").permitAll()
+                                .requestMatchers("/", "/api/v1/auth/login", "/api/v1/auth/refresh")
+                                .permitAll()
                                 .anyRequest().authenticated())
                 .oauth2ResourceServer(// cần override @Bean JwtDecoder
                         (oauth2) -> oauth2.jwt(Customizer.withDefaults())
