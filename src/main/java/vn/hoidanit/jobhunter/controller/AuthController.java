@@ -83,19 +83,21 @@ public class AuthController {
 
         @GetMapping("/auth/account")
         @ApiMessage(Value = "fetch account")
-        public ResponseEntity<ResLoginDTO.UserLogin> getAccount() {
+        public ResponseEntity<ResLoginDTO.UserGetAccount> getAccount() {
                 String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get()
                                 : "";
                 User user = this.userService.handleGetUserByUsername(email);
 
+                ResLoginDTO.UserGetAccount userGetAccount = new ResLoginDTO.UserGetAccount();
                 ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin();
                 if (user != null) {
                         userLogin.setId(user.getId());
                         userLogin.setEmail(user.getEmail());
                         userLogin.setName(user.getName());
+                        userGetAccount.setUser(userLogin);
                 }
 
-                return ResponseEntity.ok().body(userLogin);
+                return ResponseEntity.ok().body(userGetAccount);
         }
 
         @GetMapping("/auth/refresh")
@@ -143,7 +145,7 @@ public class AuthController {
                                 .body(res);
         }
 
-        @GetMapping("/auth/logout")
+        @PostMapping("/auth/logout")
         @ApiMessage(Value = "Logout User")
         public ResponseEntity<Void> logout() throws IdInvalidException {
                 // get user
