@@ -36,7 +36,7 @@ public class SecurityUtil {
     @Value("${hoidanit.jwt.refresh-token-validity-in-seconds}")
     private long refreshTokenExpiration;
 
-    public String createAccessToken(Authentication authentication) {
+    public String createAccessToken(Authentication authentication, ResLoginDTO.UserLogin dto) {
         Instant now = Instant.now();
         Instant validity = now.plus(this.accessTokenExpiration, ChronoUnit.SECONDS);
 
@@ -45,7 +45,7 @@ public class SecurityUtil {
             .issuedAt(now)
             .expiresAt(validity)
             .subject(authentication.getName())
-            .claim("authentication", authentication)
+            .claim("user", dto)
             .build();
 
         JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();
@@ -96,12 +96,12 @@ public class SecurityUtil {
      *
      * @return the JWT of the current user.
      */
-    // public static Optional<String> getCurrentUserJWT() {
-    //     SecurityContext securityContext = SecurityContextHolder.getContext();
-    //     return Optional.ofNullable(securityContext.getAuthentication())
-    //         .filter(authentication -> authentication.getCredentials() instanceof String)
-    //         .map(authentication -> (String) authentication.getCredentials());
-    // }
+    public static Optional<String> getCurrentUserJWT() {
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        return Optional.ofNullable(securityContext.getAuthentication())
+            .filter(authentication -> authentication.getCredentials() instanceof String)
+            .map(authentication -> (String) authentication.getCredentials());
+    }
 
     /**
      * Check if a user is authenticated.
