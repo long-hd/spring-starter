@@ -114,4 +114,9 @@ public class UserService {
     public User getByRefreshTokenAndEmail(String token, String email) {
         return this.userRepository.findByRefreshTokenAndEmail(token, email);
     }
+
+    public void deleteRefreshToken(User user) {
+        user.setRefreshToken(null);
+        this.userRepository.save(user);
+    }
 }
