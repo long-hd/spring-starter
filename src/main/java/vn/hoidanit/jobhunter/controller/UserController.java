@@ -70,9 +70,10 @@ public class UserController {
     }
 
     @DeleteMapping("/users/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable("id") long id) {
+    @ApiMessage(Value = "delete user")
+    public ResponseEntity<Void> deleteUser(@PathVariable("id") long id) {
         this.userService.handleDeleteUser(id);
-        return ResponseEntity.ok("delete user");
+        return ResponseEntity.ok(null);
     }
 
     @PutMapping("/users")

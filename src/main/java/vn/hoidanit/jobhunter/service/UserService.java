@@ -73,9 +73,14 @@ public class UserService {
         User user = this.userRepository.findById(updateUser.getId())
                 .orElseThrow(() -> new IdInvalidException("User voi id = " + updateUser.getId() + " khong ton tai."));
 
-        RespUpdateUserDTO dto = new RespUpdateUserDTO();
+        user.setName(updateUser.getName());
+        user.setAddress(updateUser.getAddress());
+        user.setAge(updateUser.getAge());
+        user.setGender(updateUser.getGender());
         // update
-        user = this.userRepository.save(updateUser);
+        user = this.userRepository.save(user);
+        // create response
+        RespUpdateUserDTO dto = new RespUpdateUserDTO();
         dto.setName(user.getName());
         dto.setId(user.getId());
         dto.setAddress(user.getAddress());
