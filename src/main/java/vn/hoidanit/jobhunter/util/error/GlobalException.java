@@ -59,4 +59,15 @@ public class GlobalException {
         res.setMessage("404 Not Found. URL may not exist...");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
     }
+
+    @ExceptionHandler(value = {
+            StorageException.class
+    })
+    public ResponseEntity<RestResponse<Object>> handleFileUploadException(Exception ex) {
+        RestResponse<Object> res = new RestResponse<Object>();
+        res.setError(ex.getMessage());
+        res.setMessage("Exception upload file...");
+        res.setStatusCode(HttpStatus.BAD_REQUEST.value());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+    }
 }
