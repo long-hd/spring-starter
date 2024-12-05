@@ -16,4 +16,12 @@ public class RespCreateUserDTO {
     private GenderEnum gender;
     private String address;
     private Instant createdAt;
+    private CompanyOfUser company;
+
+    @Getter
+    @Setter
+    public static class CompanyOfUser {
+        private long id;
+        private String name;
+    }
 }

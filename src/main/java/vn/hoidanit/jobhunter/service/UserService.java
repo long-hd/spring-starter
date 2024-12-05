@@ -7,20 +7,24 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import vn.hoidanit.jobhunter.domain.Company;
 import vn.hoidanit.jobhunter.domain.User;
 import vn.hoidanit.jobhunter.domain.response.RespCreateUserDTO;
 import vn.hoidanit.jobhunter.domain.response.RespUpdateUserDTO;
 import vn.hoidanit.jobhunter.domain.response.RespUserDTO;
 import vn.hoidanit.jobhunter.domain.response.ResultPaginationDTO;
+import vn.hoidanit.jobhunter.repository.CompanyRepository;
 import vn.hoidanit.jobhunter.repository.UserRepository;
 import vn.hoidanit.jobhunter.util.error.IdInvalidException;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final CompanyRepository companyRepository;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, CompanyRepository companyRepository) {
         this.userRepository = userRepository;
+        this.companyRepository = companyRepository;
     }
 
     public RespCreateUserDTO handleCreateUser(User user) throws IdInvalidException {
@@ -29,9 +33,17 @@ public class UserService {
             throw new IdInvalidException("Email " + user.getEmail() + " da ton tai, vui long su dung email khac");
         }
 
+        // ==> check if company exist
+        Company company = new Company();
+        if (user.getCompany() != null) {
+            company = this.companyRepository.findById(user.getCompany().getId()).orElse(null);
+            user.setCompany(company);
+        }
+
         user = this.userRepository.save(user);
 
         RespCreateUserDTO dto = new RespCreateUserDTO();
+        RespCreateUserDTO.CompanyOfUser companyOfUser = new RespCreateUserDTO.CompanyOfUser();
         dto.setId(user.getId());
         dto.setName(user.getName());
         dto.setEmail(user.getEmail());
@@ -39,6 +51,11 @@ public class UserService {
         dto.setAge(user.getAge());
         dto.setGender(user.getGender());
         dto.setCreatedAt(user.getCreatedAt());
+        if (company != null) {
+            companyOfUser.setId(user.getCompany().getId());
+            companyOfUser.setName(user.getCompany().getName());
+            dto.setCompany(companyOfUser);
+        }
 
         return dto;
     }
@@ -69,17 +86,31 @@ public class UserService {
     }
 
     public RespUpdateUserDTO handleUpdateUser(User updateUser) throws IdInvalidException {
+        // ==> check if user exist
         User user = this.userRepository.findById(updateUser.getId())
                 .orElseThrow(() -> new IdInvalidException("User voi id = " + updateUser.getId() + " khong ton tai."));
+
+        // ==> check if company exist
+        Company company = new Company();
+        if (updateUser.getCompany() != null) {
+            company = this.companyRepository.findById(updateUser.getCompany().getId()).orElse(null);
+            user.setCompany(company);
+        }
 
         user.setName(updateUser.getName());
         user.setAddress(updateUser.getAddress());
         user.setAge(updateUser.getAge());
         user.setGender(updateUser.getGender());
-        // update
+        // save update
         user = this.userRepository.save(user);
         // create response
         RespUpdateUserDTO dto = new RespUpdateUserDTO();
+        RespUpdateUserDTO.CompanyOfUser companyOfUser = new RespUpdateUserDTO.CompanyOfUser();
+        if (user.getCompany() != null) {
+            companyOfUser.setId(user.getCompany().getId());
+            companyOfUser.setName(user.getCompany().getName());
+            dto.setCompany(companyOfUser);
+        }
         dto.setName(user.getName());
         dto.setId(user.getId());
         dto.setAddress(user.getAddress());
@@ -96,6 +127,14 @@ public class UserService {
 
     private RespUserDTO toRespUserDTO(User user) {
         RespUserDTO dto = new RespUserDTO();
+        RespUserDTO.CompanyOfUser companyOfUser = new RespUserDTO.CompanyOfUser();
+
+        if (user.getCompany() != null) {
+            companyOfUser.setId(user.getCompany().getId());
+            companyOfUser.setName(user.getCompany().getName());
+            dto.setCompany(companyOfUser);
+        }
+
         dto.setId(user.getId());
         dto.setName(user.getName());
         dto.setAddress(user.getAddress());
@@ -119,8 +158,8 @@ public class UserService {
         return this.userRepository.findByRefreshTokenAndEmail(token, email);
     }
 
-    public void deleteRefreshToken(User user) {
-        user.setRefreshToken(null);
-        this.userRepository.save(user);
-    }
+    // public void deleteRefreshToken(User user) {
+    // user.setRefreshToken(null);
+    // this.userRepository.save(user);
+    // }
 }
