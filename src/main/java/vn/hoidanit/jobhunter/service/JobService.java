@@ -9,9 +9,9 @@ import org.springframework.stereotype.Service;
 
 import vn.hoidanit.jobhunter.domain.Job;
 import vn.hoidanit.jobhunter.domain.Skill;
-import vn.hoidanit.jobhunter.domain.response.RespCreateJobDTO;
-import vn.hoidanit.jobhunter.domain.response.RespUpdateJobDTO;
 import vn.hoidanit.jobhunter.domain.response.ResultPaginationDTO;
+import vn.hoidanit.jobhunter.domain.response.job.RespCreateJobDTO;
+import vn.hoidanit.jobhunter.domain.response.job.RespUpdateJobDTO;
 import vn.hoidanit.jobhunter.repository.JobRepository;
 import vn.hoidanit.jobhunter.repository.SkillRepository;
 import vn.hoidanit.jobhunter.util.error.IdInvalidException;
