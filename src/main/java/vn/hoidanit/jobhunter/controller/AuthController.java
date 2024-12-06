@@ -58,10 +58,10 @@ public class AuthController {
                 ResLoginDTO res = new ResLoginDTO();
                 User userDb = userService.handleGetUserByUsername(loginDTO.getUsername());
                 ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(userDb.getId(), userDb.getName(),
-                                userDb.getEmail());
+                                userDb.getEmail(), userDb.getRole());
                 res.setUser(userLogin);
                 // create access token
-                String accessToken = this.sercurityUtil.createAccessToken(authentication.getName(), res.getUser());
+                String accessToken = this.sercurityUtil.createAccessToken(authentication.getName(), res);
                 res.setAccessToken(accessToken);
                 // create refresh token
                 String refreshToken = this.sercurityUtil.createRefreshToken(loginDTO.getUsername(), res);
@@ -94,6 +94,7 @@ public class AuthController {
                         userLogin.setId(user.getId());
                         userLogin.setEmail(user.getEmail());
                         userLogin.setName(user.getName());
+                        userLogin.setRole(user.getRole());
                         userGetAccount.setUser(userLogin);
                 }
 
@@ -122,10 +123,10 @@ public class AuthController {
                 ResLoginDTO res = new ResLoginDTO();
                 User userDb = userService.handleGetUserByUsername(email);
                 ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(userDb.getId(), userDb.getName(),
-                                userDb.getEmail());
+                                userDb.getEmail(), userDb.getRole());
                 res.setUser(userLogin);
                 // create access token
-                String accessToken = this.sercurityUtil.createAccessToken(email, res.getUser());
+                String accessToken = this.sercurityUtil.createAccessToken(email, res);
                 res.setAccessToken(accessToken);
                 // create refresh token
                 String refreshToken = this.sercurityUtil.createRefreshToken(email, res);
