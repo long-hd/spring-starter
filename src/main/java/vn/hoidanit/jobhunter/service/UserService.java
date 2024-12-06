@@ -51,7 +51,7 @@ public class UserService {
         dto.setAge(user.getAge());
         dto.setGender(user.getGender());
         dto.setCreatedAt(user.getCreatedAt());
-        if (company != null) {
+        if (user.getCompany() != null) {
             companyOfUser.setId(user.getCompany().getId());
             companyOfUser.setName(user.getCompany().getName());
             dto.setCompany(companyOfUser);

@@ -1,5 +1,6 @@
 package vn.hoidanit.jobhunter.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -7,11 +8,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import vn.hoidanit.jobhunter.domain.Company;
 import vn.hoidanit.jobhunter.domain.Job;
 import vn.hoidanit.jobhunter.domain.Skill;
 import vn.hoidanit.jobhunter.domain.response.ResultPaginationDTO;
 import vn.hoidanit.jobhunter.domain.response.job.RespCreateJobDTO;
 import vn.hoidanit.jobhunter.domain.response.job.RespUpdateJobDTO;
+import vn.hoidanit.jobhunter.repository.CompanyRepository;
 import vn.hoidanit.jobhunter.repository.JobRepository;
 import vn.hoidanit.jobhunter.repository.SkillRepository;
 import vn.hoidanit.jobhunter.util.error.IdInvalidException;
@@ -20,20 +23,33 @@ import vn.hoidanit.jobhunter.util.error.IdInvalidException;
 public class JobService {
     private final JobRepository jobRepository;
     private final SkillRepository skillRepository;
+    private final CompanyRepository companyRepository;
 
-    public JobService(JobRepository jobRepository, SkillRepository skillRepository) {
+    public JobService(JobRepository jobRepository, SkillRepository skillRepository,
+            CompanyRepository companyRepository) {
         this.jobRepository = jobRepository;
         this.skillRepository = skillRepository;
+        this.companyRepository = companyRepository;
     }
 
     public RespCreateJobDTO handleCreateJob(Job reqJob) {
         RespCreateJobDTO dto = new RespCreateJobDTO();
-        // get list skill
-        List<Long> listSkillId = reqJob.getSkills().stream().map(job -> job.getId()).toList();
-        List<Skill> skills = this.skillRepository.findAllById(listSkillId);
-        List<String> listSkillName = skills.stream().map(skill -> skill.getName()).toList();
+        // set list skill
+        List<String> listSkillName = new ArrayList<>();
+        if (reqJob.getSkills() != null) {
+            List<Long> listSkillId = reqJob.getSkills().stream().map(job -> job.getId()).toList();
+            List<Skill> skills = this.skillRepository.findAllById(listSkillId);
+            reqJob.setSkills(skills);
+            listSkillName = skills.stream().map(skill -> skill.getName()).toList();
+        }
 
-        reqJob.setSkills(skills);
+        // set company
+        if (reqJob.getCompany() != null) {
+            Company company = this.companyRepository.findById(reqJob.getCompany().getId())
+                    .orElse(null);
+            reqJob.setCompany(company);
+        }
+
         Job job = this.jobRepository.save(reqJob);
 
         dto.setName(job.getName());
@@ -55,10 +71,20 @@ public class JobService {
         Job job = this.jobRepository.findById(reqJob.getId())
                 .orElseThrow(() -> new IdInvalidException("Job không tồn tại"));
 
-        // get list skill
-        List<Long> listSkillId = reqJob.getSkills().stream().map(j -> j.getId()).toList();
-        List<Skill> skills = this.skillRepository.findAllById(listSkillId);
-        List<String> listSkillName = skills.stream().map(skill -> skill.getName()).toList();
+        // set list skill
+        if (reqJob.getSkills() != null) {
+            List<Long> listSkillId = reqJob.getSkills().stream().map(j -> j.getId()).toList();
+            List<Skill> skills = this.skillRepository.findAllById(listSkillId);
+            job.setSkills(skills);
+        }
+        List<String> listSkillName = job.getSkills().stream().map(skill -> skill.getName()).toList();
+
+        // set company
+        if (reqJob.getCompany() != null) {
+            Company company = this.companyRepository.findById(reqJob.getCompany().getId())
+                    .orElse(job.getCompany());
+            job.setCompany(company);
+        }
 
         // save update
         job.setName(reqJob.getName());
@@ -70,7 +96,6 @@ public class JobService {
         job.setStartDate(reqJob.getStartDate());
         job.setEndDate(reqJob.getEndDate());
         job.setActive(reqJob.isActive());
-        job.setSkills(skills);
         job = this.jobRepository.save(job);
 
         // set response
@@ -101,7 +126,7 @@ public class JobService {
         ResultPaginationDTO dto = new ResultPaginationDTO();
 
         ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
-        meta.setPage(pageJob.getNumber());
+        meta.setPage(pageJob.getNumber() + 1);
         meta.setPageSize(pageJob.getSize());
         meta.setPages(pageJob.getTotalPages());
         meta.setTotal(pageJob.getTotalElements());

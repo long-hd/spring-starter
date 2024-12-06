@@ -88,7 +88,7 @@ public class ResumeService {
 
         ResultPaginationDTO res = new ResultPaginationDTO();
         ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
-        meta.setPage(pageResume.getNumber());
+        meta.setPage(pageResume.getNumber() + 1);
         meta.setPageSize(pageResume.getSize());
         meta.setPages(pageResume.getTotalPages());
         meta.setTotal(pageResume.getTotalElements());
@@ -114,6 +114,9 @@ public class ResumeService {
         dto.setStatus(item.getStatus());
         dto.setUpdatedAt(item.getUpdatedAt());
         dto.setUpdatedBy(item.getUpdatedBy());
+        if (item.getJob() != null || item.getJob().getCompany() != null) {
+            dto.setCompanyName(item.getJob().getCompany().getName());
+        }
         return dto;
     }
 }

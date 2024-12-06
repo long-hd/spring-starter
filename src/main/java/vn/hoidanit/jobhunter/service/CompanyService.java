@@ -12,6 +12,7 @@ import vn.hoidanit.jobhunter.domain.User;
 import vn.hoidanit.jobhunter.domain.response.ResultPaginationDTO;
 import vn.hoidanit.jobhunter.repository.CompanyRepository;
 import vn.hoidanit.jobhunter.repository.UserRepository;
+import vn.hoidanit.jobhunter.util.error.IdInvalidException;
 
 @Service
 public class CompanyService {
@@ -61,5 +62,10 @@ public class CompanyService {
             return this.companyRepository.save(company);
         }
         return company;
+    }
+
+    public Company handleGetCompany(Long id) throws IdInvalidException {
+        return this.companyRepository.findById(id)
+                .orElseThrow(() -> new IdInvalidException("Company id = " + id + " khong ton tai"));
     }
 }

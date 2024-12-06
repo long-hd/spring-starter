@@ -24,6 +24,7 @@ import vn.hoidanit.jobhunter.domain.Company;
 import vn.hoidanit.jobhunter.domain.response.ResultPaginationDTO;
 import vn.hoidanit.jobhunter.service.CompanyService;
 import vn.hoidanit.jobhunter.util.annotation.ApiMessage;
+import vn.hoidanit.jobhunter.util.error.IdInvalidException;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -58,6 +59,13 @@ public class CompanyController {
     @PutMapping("/companies")
     public ResponseEntity<Company> updateCompany(@RequestBody Company updateCompany) {
         Company company = this.companyService.handleUpdateCompany(updateCompany);
+        return ResponseEntity.ok(company);
+    }
+
+    @GetMapping("/companies/{id}")
+    @ApiMessage(Value = "fetch companie")
+    public ResponseEntity<Company> getACompany(@PathVariable("id") Long id) throws IdInvalidException {
+        Company company = this.companyService.handleGetCompany(id);
         return ResponseEntity.ok(company);
     }
 }

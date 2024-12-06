@@ -25,6 +25,7 @@ public class RespResumeDTO {
     private String createdBy;
     private String updatedBy;
 
+    private String companyName;
     private JobOfResume job;
     private UserOfResume user;
 
