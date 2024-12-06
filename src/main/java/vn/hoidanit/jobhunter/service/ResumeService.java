@@ -1,7 +1,5 @@
 package vn.hoidanit.jobhunter.service;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -72,7 +70,7 @@ public class ResumeService {
     public void handleDeleteResume(Long id) throws IdInvalidException {
         Resume resume = this.resumeRepository.findById(id)
                 .orElseThrow(() -> new IdInvalidException("Resume khong ton tai"));
-        this.resumeRepository.deleteById(id);
+        this.resumeRepository.delete(resume);
     }
 
     public RespResumeDTO handleGetResume(Long id) throws IdInvalidException {
