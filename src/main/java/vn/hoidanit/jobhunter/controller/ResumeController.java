@@ -1,5 +1,7 @@
 package vn.hoidanit.jobhunter.controller;
 
+import java.net.ResponseCache;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -22,6 +24,7 @@ import vn.hoidanit.jobhunter.domain.response.resume.RespCreateResumeDTO;
 import vn.hoidanit.jobhunter.domain.response.resume.RespResumeDTO;
 import vn.hoidanit.jobhunter.domain.response.resume.RespUpdateResumeDTO;
 import vn.hoidanit.jobhunter.service.ResumeService;
+import vn.hoidanit.jobhunter.util.annotation.ApiMessage;
 import vn.hoidanit.jobhunter.util.error.IdInvalidException;
 
 @RestController
@@ -61,6 +64,13 @@ public class ResumeController {
     @GetMapping
     public ResponseEntity<ResultPaginationDTO> getAllResume(@Filter Specification<Resume> spec, Pageable pageable) {
         ResultPaginationDTO dto = this.resumeService.handleGetAllResume(spec, pageable);
+        return ResponseEntity.ok().body(dto);
+    }
+
+    @PostMapping("/by-user")
+    @ApiMessage(Value = "Get resume by user")
+    public ResponseEntity<ResultPaginationDTO> getResumeByUser(Pageable pageable) {
+        ResultPaginationDTO dto = this.resumeService.handleGetResumeByUser(pageable);
         return ResponseEntity.ok().body(dto);
     }
 }
