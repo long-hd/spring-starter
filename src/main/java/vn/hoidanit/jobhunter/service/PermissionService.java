@@ -38,7 +38,9 @@ public class PermissionService {
         if (this.permissionRepository.existsByApiPathAndMethodAndModule(
                 reqPermission.getApiPath(), reqPermission.getMethod(),
                 reqPermission.getModule())) {
-            throw new IdInvalidException("Permission đã tồn tại");
+            if (this.permissionRepository.existsByName(reqPermission.getName())) {
+                throw new IdInvalidException("Permission đã tồn tại");
+            }
         }
 
         // save

@@ -82,4 +82,10 @@ public class RoleService {
 
         this.roleRepository.deleteById(id);
     }
+
+    public Role handleGetRole(Long id) throws IdInvalidException {
+        Role role = this.roleRepository.findById(id)
+                .orElseThrow(() -> new IdInvalidException("Role không tồn tai"));
+        return role;
+    }
 }

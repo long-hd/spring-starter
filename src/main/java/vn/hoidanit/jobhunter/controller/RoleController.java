@@ -57,4 +57,11 @@ public class RoleController {
         this.roleService.handleDeleteRole(id);
         return ResponseEntity.ok(null);
     }
+
+    @GetMapping("{id}")
+    @ApiMessage(Value = "Get role by id")
+    public ResponseEntity<Role> getRole(@PathVariable("id") Long id) throws IdInvalidException {
+        Role role = this.roleService.handleGetRole(id);
+        return ResponseEntity.ok().body(role);
+    }
 }
