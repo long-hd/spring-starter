@@ -1,7 +1,5 @@
 package vn.hoidanit.jobhunter.controller;
 
-import java.net.ResponseCache;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
