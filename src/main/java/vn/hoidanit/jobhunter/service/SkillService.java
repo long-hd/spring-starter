@@ -81,8 +81,11 @@ public class SkillService {
         Skill skill = this.skillRepository.findById(id)
                 .orElseThrow(() -> new IdInvalidException("Skill không tồn tại"));
 
-        // delete skill in each job
+        // delete this skill in each job
         skill.getJobs().forEach(job -> job.getSkills().remove(skill));
+
+        // delete this skill in each subcriber
+        skill.getSubscribers().forEach(sub -> sub.getSkills().remove(skill));
 
         this.skillRepository.delete(skill);
     }
