@@ -1,16 +1,20 @@
 package vn.hoidanit.jobhunter.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.turkraft.springfilter.builder.FilterBuilder;
 import com.turkraft.springfilter.converter.FilterSpecification;
 import com.turkraft.springfilter.converter.FilterSpecificationConverter;
 import com.turkraft.springfilter.parser.FilterParser;
 import com.turkraft.springfilter.parser.node.FilterNode;
 
+import vn.hoidanit.jobhunter.domain.Company;
 import vn.hoidanit.jobhunter.domain.Job;
 import vn.hoidanit.jobhunter.domain.Resume;
 import vn.hoidanit.jobhunter.domain.User;
@@ -26,15 +30,16 @@ import vn.hoidanit.jobhunter.util.error.IdInvalidException;
 
 @Service
 public class ResumeService {
+    @Autowired
+    FilterBuilder filterBuilder;
+    @Autowired
+    private FilterParser filterParser;
+    @Autowired
+    private FilterSpecificationConverter filterSpecificationConverter;
+
     private final ResumeRepository resumeRepository;
     private final UserRepository userRepository;
     private final JobRepository jobRepository;
-
-    @Autowired
-    private FilterParser filterParser;
-
-    @Autowired
-    private FilterSpecificationConverter filterSpecificationConverter;
 
     public ResumeService(ResumeRepository resumeRepository, UserRepository userRepository,
             JobRepository jobRepository) {
@@ -95,7 +100,25 @@ public class ResumeService {
     }
 
     public ResultPaginationDTO handleGetAllResume(Specification<Resume> spec, Pageable pageable) {
-        Page<Resume> pageResume = this.resumeRepository.findAll(spec, pageable);
+        List<Long> arrJobIds = null;
+        String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : "";
+        User userDb = this.userRepository.findByEmail(email);
+        if (userDb != null) {// user -> company -> job -> resume of company of user
+            Company companyOfUser = userDb.getCompany();
+            if (companyOfUser != null) {
+                List<Job> jobsOfCompany = companyOfUser.getJobs();
+                if (jobsOfCompany != null && jobsOfCompany.size() > 0) {
+                    arrJobIds = jobsOfCompany.stream().map(job -> job.getId()).toList();
+                }
+            }
+        }
+
+        Specification<Resume> jobInSpec = filterSpecificationConverter.convert(filterBuilder.field("job")
+                .in(filterBuilder.input(arrJobIds)).get());
+
+        Specification<Resume> finalSpec = jobInSpec.and(spec);
+
+        Page<Resume> pageResume = this.resumeRepository.findAll(finalSpec, pageable);
 
         ResultPaginationDTO res = new ResultPaginationDTO();
         ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
