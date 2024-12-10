@@ -1,11 +1,15 @@
 package vn.hoidanit.jobhunter.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import vn.hoidanit.jobhunter.domain.Job;
 import vn.hoidanit.jobhunter.domain.Skill;
 import vn.hoidanit.jobhunter.domain.Subscriber;
+import vn.hoidanit.jobhunter.domain.response.email.RespEmailJob;
+import vn.hoidanit.jobhunter.repository.JobRepository;
 import vn.hoidanit.jobhunter.repository.SkillRepository;
 import vn.hoidanit.jobhunter.repository.SubscriberRepository;
 import vn.hoidanit.jobhunter.repository.UserRepository;
@@ -16,12 +20,16 @@ public class SubscriberService {
     private final SubscriberRepository subscriberRepository;
     private final SkillRepository skillRepository;
     private final UserRepository userRepository;
+    private final JobRepository jobRepository;
+    private final EmailService emailService;
 
     public SubscriberService(SubscriberRepository subscriberRepository, SkillRepository skillRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository, JobRepository jobRepository, EmailService emailService) {
         this.subscriberRepository = subscriberRepository;
         this.skillRepository = skillRepository;
         this.userRepository = userRepository;
+        this.jobRepository = jobRepository;
+        this.emailService = emailService;
     }
 
     public Subscriber handleCreateSubscriber(Subscriber reqSubscriber) throws IdInvalidException {
@@ -56,6 +64,43 @@ public class SubscriberService {
         }
 
         return this.subscriberRepository.save(subscriber);
+    }
+
+    public void sendSubscribersEmailJobs() {
+        List<Subscriber> listSubs = this.subscriberRepository.findAll();
+        if (listSubs != null && listSubs.size() > 0) {
+            for (Subscriber sub : listSubs) {
+                List<Skill> listSkills = sub.getSkills();
+                if (listSkills != null && listSkills.size() > 0) {
+                    List<Job> listJobs = this.jobRepository.findBySkillsIn(listSkills);
+                    if (listJobs != null && listJobs.size() > 0) {
+
+                        List<RespEmailJob> arr = listJobs.stream().map(
+                                job -> this.convertJobToSendEmail(job)).collect(Collectors.toList());
+
+                        this.emailService.sendEmailFromTemplateSync(
+                                sub.getEmail(),
+                                "Cơ hội việc làm hot đang chờ đón bạn, khám phá ngay",
+                                "job",
+                                sub.getName(),
+                                arr);
+                    }
+                }
+            }
+        }
+    }
+
+    private RespEmailJob convertJobToSendEmail(Job job) {
+        RespEmailJob respEmailJob = new RespEmailJob();
+        respEmailJob.setName(job.getName());
+        respEmailJob.setSalary(job.getSalary());
+        RespEmailJob.CompanyName companyName = new RespEmailJob.CompanyName(job.getName());
+        respEmailJob.setCompany(companyName);
+        List<RespEmailJob.SkillName> skills = job.getSkills().stream()
+                .map(skill -> new RespEmailJob.SkillName(skill.getName()))
+                .toList();
+        respEmailJob.setSkills(skills);
+        return respEmailJob;
     }
 
 }
