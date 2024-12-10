@@ -50,7 +50,10 @@ public class SecurityConfiguration {
                 "/storage/**",
                 "/api/v1/email/**",
                 "/api/v1/resumes/by-user",
-                "/api/v1/subscribers/**"
+                "/api/v1/subscribers/**",
+                "/v3/api-docs/**",
+                "/swagger-ui/**",
+                "/swagger-ui.html"
         };
 
         http
