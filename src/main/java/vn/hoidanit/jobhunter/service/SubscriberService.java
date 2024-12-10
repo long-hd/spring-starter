@@ -34,6 +34,10 @@ public class SubscriberService {
     }
 
     public Subscriber handleCreateSubscriber(Subscriber reqSubscriber) throws IdInvalidException {
+        // ==> check if email is used to subscribe
+        if (this.userRepository.findByEmail(reqSubscriber.getEmail()) == null) {
+            throw new IdInvalidException("Email đã được dùng để theo dõi");
+        }
         // ==> check if email of user not exist
         if (this.userRepository.findByEmail(reqSubscriber.getEmail()) == null) {
             throw new IdInvalidException("Email dùng để theo dõi không tồn tại");
@@ -107,6 +111,14 @@ public class SubscriberService {
                 .toList();
         respEmailJob.setSkills(skills);
         return respEmailJob;
+    }
+
+    public Subscriber findByEmail(String email) throws IdInvalidException {
+        Subscriber subscriber = this.subscriberRepository.findByEmail(email);
+        if (subscriber == null) {
+            throw new IdInvalidException("Email " + email + " khong ton tai");
+        }
+        return subscriber;
     }
 
 }
