@@ -3,6 +3,7 @@ package vn.hoidanit.jobhunter.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import vn.hoidanit.jobhunter.domain.Job;
@@ -47,6 +48,11 @@ public class SubscriberService {
 
         return this.subscriberRepository.save(reqSubscriber);
     }
+
+    // @Scheduled(cron = "*/10 * * * * *")
+    // public void testCron() {
+    // System.out.println(">>> TEST CRON");
+    // }
 
     public Subscriber handleUpdateSubscriber(Subscriber reqSubscriber) throws IdInvalidException {
         // ==> check if subscriber id not exist
